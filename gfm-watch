@@ -1,0 +1,22 @@
+#!/bin/bash
+
+scriptDir=$(dirname "$0")
+
+inotifywait -mr -e modify,create,delete,moved_to --format '%f %e' . | while read f ev; do
+
+    if [ $(echo $f | grep -c '\.md$') -eq 1 ]; then
+
+        mdFile=$f
+        htmlFile=$(echo "${mdFile}" | sed 's|\.md$|.html|')
+
+        if [ "${ev}" == "DELETE" ]; then
+            echo "Deleting ${htmlFile}"
+            rm "${htmlFile}"
+        else
+            echo "Converting ${mdFile}"
+            "${scriptDir}/gfm2html" "${mdFile}" "${htmlFile}"
+        fi
+
+    fi
+
+done

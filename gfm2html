@@ -1,0 +1,59 @@
+#!/usr/bin/ruby
+require 'redcarpet'
+require 'pygments'
+
+
+class CustomHTML < Redcarpet::Render::HTML
+
+
+  def doc_header( )
+'<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" href="css/markdown.css"/>
+<link rel="stylesheet" href="css/pygments.css"/>
+</head>
+<body>
+'
+  end
+
+
+  def block_code( code, language )
+    #Pygments.highlight( code, lexer: language, options: { linenos: 'table' } )
+    Pygments.highlight( code, lexer: language )
+  end
+
+
+  def doc_footer( )
+'
+</body>
+</html>'
+  end
+
+
+end
+
+
+renderer = CustomHTML.new( )
+
+markdown = Redcarpet::Markdown.new( renderer,
+                                    with_toc_data: true,
+                                    tables: true,
+                                    fenced_code_blocks: true,
+                                    autolink: true,
+                                    strikethrough: true,
+                                    superscript: true,
+                                    underline: true,
+                                    highlight: true )
+
+
+
+inFilename = ARGV[ 0 ]
+outFilename = ARGV[ 1 ]
+
+inText = File.read( inFilename )
+outText = markdown.render( inText )
+File.open( outFilename, 'w' ) { |file| file.write( outText ) }
+

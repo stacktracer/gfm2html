@@ -1,0 +1,14 @@
+#!/bin/bash
+
+scriptDir=$(dirname "$0")
+
+# Currently the CSS files are assumed to be at css/*.css,
+# so we can't yet handle files in subdirs
+
+find . -type f -name '*.md' | while read mdFile; do
+
+    echo "Converting ${mdFile}"
+    htmlFile=$(echo "${mdFile}" | sed 's|\.md$|.html|')
+    "${scriptDir}/gfm2html" "${mdFile}" "${htmlFile}"
+
+done
