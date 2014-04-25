@@ -1,8 +1,28 @@
 #!/bin/bash
 
+normal="\e[0m"
+boldNormal="\e[0;1m"
+
+
 scriptDir=$(dirname "$0")
 
-inotifywait -mr -e modify,create,delete,moved_to --format '%f %e' . | while read f ev; do
+
+echo ""
+find . -type f -name '*.md' | while read f; do
+
+    mdFile=$(echo $f | sed 's|^\./||')
+    htmlFile=$(echo "${mdFile}" | sed 's|\.md$|.html|')
+
+    echo -en "Converting ${boldNormal}${mdFile}${normal} ..."
+    "${scriptDir}/gfm2html" "${mdFile}" "${htmlFile}"
+    echo -e " DONE"
+
+done
+
+
+echo ""
+echo -e "Watching for changes ..."
+inotifywait -qmr -e modify,create,delete,moved_to --format '%f %e' . | while read f ev; do
 
     if [ $(echo $f | grep -c '\.md$') -eq 1 ]; then
 
@@ -10,11 +30,13 @@ inotifywait -mr -e modify,create,delete,moved_to --format '%f %e' . | while read
         htmlFile=$(echo "${mdFile}" | sed 's|\.md$|.html|')
 
         if [ "${ev}" == "DELETE" ]; then
-            echo "Deleting ${htmlFile}"
+            echo -en "Deleting ${boldNormal}${htmlFile}${normal} ..."
             rm "${htmlFile}"
+            echo -e " DONE"
         else
-            echo "Converting ${mdFile}"
+            echo -en "Converting ${boldNormal}${mdFile}${normal} ..."
             "${scriptDir}/gfm2html" "${mdFile}" "${htmlFile}"
+            echo -e " DONE"
         fi
 
     fi
